@@ -1,0 +1,80 @@
+<div class="spreadings-container">
+  <table class="table-spreadings">
+    <thead>
+      <tr>
+        <th>Période d'Acquisition</th>
+        <th class="text-center">Mois acquis</th>
+        <th class="text-center">Jours acquis</th>
+        <th class="text-right">Maintien Salaire</th>
+        <th class="text-right">Règle des 10%</th>
+        <th class="text-right">Valeur Finale</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% periods.each do |period| %>
+        <tr>
+          <td class="dates">
+            <%= period[:start_date_period]&.strftime("%d/%m/%Y") %> au 
+            <%= period[:end_date_period]&.strftime("%d/%m/%Y") %>
+          </td>
+          <td class="text-center">
+            <%= number_with_precision(period[:number_of_months_of_acquisition], precision: 2) %>
+          </td>
+          <td class="text-center highlight-days">
+            <%= number_with_precision(period[:number_of_days_acquired], precision: 1) %>
+          </td>
+          <td class="text-right">
+            <%= number_to_currency(period[:salary_maintenance_method], locale: :fr) %>
+          </td>
+          <td class="text-right">
+            <%= number_to_currency(period[:ten_percent_method], locale: :fr) %>
+          </td>
+          <td class="text-right final-total">
+            <%= number_to_currency(period[:final_value], locale: :fr) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  /* On réutilise exactement la même charte graphique */
+  .spreadings-container {
+    margin: 20px 0;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .table-spreadings {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    background: white;
+  }
+  .table-spreadings th {
+    background: #f4f7f6;
+    color: #444;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+    font-weight: 600;
+    text-transform: none; /* Garde le texte naturel */
+  }
+  .table-spreadings td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  
+  .dates { font-weight: 500; color: #2c3e50; }
+  .highlight-days { color: #2980b9; font-weight: 600; }
+  .final-total { font-weight: bold; color: #27ae60; }
+
+  /* Effet au survol pour la lisibilité */
+  .table-spreadings tr:hover {
+    background-color: #fcfcfc;
+  }
+</style>

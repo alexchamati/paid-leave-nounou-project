@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# first exemple is given in the subject
+one:
+  start_date: 2020-03-15
+  end_date: 2023-01-31
+  salary: 506
+
+# last here is my exemple sent by email
+two:
+  start_date: 2023-04-24
+  end_date: 2025-08-08
+  salary: 465
+
+# contract of some day
+three:
+  start_date: 2026-04-02
+  end_date: 2026-04-24
+  salary: 465

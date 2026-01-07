@@ -1,0 +1,21 @@
+default: &default
+  salary:
+    min: 200
+    max: 1200
+
+  year_ref:
+    start:
+      month: 6
+      day: 1
+    end:
+      month: 5
+      day: 31
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

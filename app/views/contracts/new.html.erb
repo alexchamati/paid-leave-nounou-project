@@ -1,0 +1,31 @@
+<h1>Simulez votre contrat</h1>
+
+<section id="form-section" class="section-container">
+  <%= render "form", contract: @contract %>
+</section>
+
+<% if @last_contract.present? %>
+  <section id="content-section" class="section-container">
+    <article id="summary_contract">
+      <div>Date de début</div>
+      <div><%= @last_contract.start_date&.strftime("%d/%m/%Y") || "—" %></div>
+
+      <div>Date de fin</div>
+      <div><%= @last_contract.end_date&.strftime("%d/%m/%Y") || "—" %></div>
+
+      <div>Salaire</div>
+      <div>
+        <%= @last_contract.salary.present? ? number_to_currency(@last_contract.salary, locale: :fr) : "—" %>
+      </div>
+    </article>
+
+    <article id="paid_leave-periods">
+      <%= render "periods", periods: @last_contract.paid_leave_datas[:periods] %>
+    </article>
+
+    <article id="paid_leave-spreading_out">
+      <%= render "spreadings", spreadings: @last_contract.paid_leave_datas[:spreadings] %>
+    </article>
+  </section>
+<% end %>
+
