@@ -9,7 +9,7 @@ class ContractsController < ApplicationController
     if @contract.save
       redirect_to new_contract_path, notice: "Contract Loaded"
     else
-      @last_contract = @contract
+      @last_contract = Contract.last
       render :new, status: :unprocessable_entity
     end
   end
