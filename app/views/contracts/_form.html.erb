@@ -1,55 +1,135 @@
-<%= form_with model: contract, local: true do |f| %>
-  <div class="start_date-container">
-    <%= f.label :start_date, "Date de début de contrat" %>
-    <div>
-      <%= f.date_field :start_date,
-        pattern: "(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0,1,2])\/(19|20)\d{2}",
-        required: true,
-        value: contract.start_date,
-        # disabled keyboard, selection only
-        onkeydown: "return false;",
-        onpaste: "return false;",
-        autocomplete: "off"
-      %>
-    </div>
-    <% if contract.errors[:start_date].any? %>
-      <div id="start_date-error-message"><%= contract.errors[:start_date].first %></div>
-    <% end %>
-  </div>
-
-  <div class="end_date-container">
-    <%= f.label :end_date, "Date de fin de contrat" %>
-    <div>
-      <%= f.date_field :end_date,
-        pattern: "(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0,1,2])\/(19|20)\d{2}",
-        required: true,
-        value: contract.end_date,
-        # disabled keyboard, selection only
-        onkeydown: "return false;",
-        onpaste: "return false;",
-        autocomplete: "off"
-      %>
-    </div>
-    <% if contract.errors[:end_date].any? %>
-      <div id="end_date-error-message"><%= contract.errors[:end_date].first %></div>
-    <% end %>
-  </div>
-
-  <div class="salary-container">
-    <%= f.label :salary, "Salaire brut mensuel €" %>
-    <%= f.number_field :salary,
-          min: CONTRACT_CONFIG[:salary][:min],
-          max: CONTRACT_CONFIG[:salary][:max],
-          step: 1,
+<div class="contract-form-container">
+  <%= form_with model: contract, local: true, class: "styled-form" do |f| %>
+    
+    <div class="field-container">
+      <%= f.label :start_date, "Date de début de contrat" %>
+      <div class="input-wrapper">
+        <%= f.date_field :start_date,
           required: true,
-          value: contract.salary,
-          placeholder: "Entrez un salaire entre #{CONTRACT_CONFIG[:salary][:min]} et #{CONTRACT_CONFIG[:salary][:max]} €" %>
-    <% if contract.errors[:salary].any? %>
-      <div id="salary-error-message"><%= contract.errors[:salary].first %></div>
-    <% end %>
-  </div>
+          value: contract.start_date,
+          onkeydown: "return false;",
+          onpaste: "return false;",
+          autocomplete: "off"
+        %>
+      </div>
+      <% if contract.errors[:start_date].any? %>
+        <div class="error-message"><%= contract.errors[:start_date].first %></div>
+      <% end %>
+    </div>
 
-  <div class="submit-container">
-    <%= f.submit "Créer le contrat" %>
-  </div>
-<% end %>
+    <div class="field-container">
+      <%= f.label :end_date, "Date de fin de contrat" %>
+      <div class="input-wrapper">
+        <%= f.date_field :end_date,
+          pattern: "(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0,1,2])\/(19|20)\d{2}",
+          required: true,
+          value: contract.end_date,
+          onkeydown: "return false;",
+          onpaste: "return false;",
+          autocomplete: "off"
+        %>
+      </div>
+      <% if contract.errors[:end_date].any? %>
+        <div class="error-message"><%= contract.errors[:end_date].first %></div>
+      <% end %>
+    </div>
+
+    <div class="field-container">
+      <%= f.label :salary, "Salaire brut mensuel (€)" %>
+      <div class="input-wrapper">
+        <%= f.number_field :salary,
+            min: CONTRACT_CONFIG[:salary][:min],
+            max: CONTRACT_CONFIG[:salary][:max],
+            step: 1,
+            required: true,
+            value: contract.salary,
+            placeholder: "Ex: 506"
+         %>
+      </div>
+      <% if contract.errors[:salary].any? %>
+        <div class="error-message"><%= contract.errors[:salary].first %></div>
+      <% end %>
+    </div>
+
+    <div class="submit-container">
+      <%= f.submit "Créer le contrat", class: "btn-submit" %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  .contract-form-container {
+    max-width: 500px;
+    margin: 20px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .styled-form .field-container {
+    margin-bottom: 20px;
+  }
+
+  .styled-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #444;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .styled-form input[type="date"],
+  .styled-form input[type="number"],
+  .styled-form input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #2c3e50;
+    background-color: #fff;
+    box-sizing: border-box; 
+    transition: border-color 0.2s;
+  }
+
+  .styled-form input:focus {
+    outline: none;
+    border-color: #2980b9;
+    box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+  }
+
+  .error-message {
+    color: #e74c3c;
+    font-size: 11px;
+    margin-top: 5px;
+    font-weight: 500;
+  }
+
+  .submit-container {
+    margin-top: 30px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    background-color: #2980b9;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .btn-submit:hover {
+    background-color: #2471a3;
+  }
+
+  .btn-submit:active {
+    background-color: #1f618d;
+  }
+</style>
