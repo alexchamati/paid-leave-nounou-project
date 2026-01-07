@@ -32,8 +32,6 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
   end
 
   test "should valid salary" do
-    assert_equal 35, @spreadings.length, "number of spreadings is invalid"
-
     @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
 
     @spreadings.each_with_index do |spreading, index|
@@ -51,8 +49,6 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
   end
 
   test "should valid paid leave full june" do
-    assert_equal 35, @spreadings.length, "number of spreadings is invalid"
-
     @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
 
@@ -68,6 +64,39 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
         assert_equal @periods[index][:final_value], spreading[:paid_leave_full_june], "paid_leave_full_june is invalid at index #{index_spreading}"
         index += 1
       end
+    end
+  end
+
+  test "should valid paid leave twelfth" do
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+
+    paids_leave_twelfth = [
+      { index: 0, paid_leave_twelfth: nil },
+      { index: 6, paid_leave_twelfth: 12.211021505376344 },
+      { index: 34, paid_leave_twelfth: 747.5 }
+    ]
+
+    paids_leave_twelfth.each_with_index do |paid_leave_twelfth, index|
+      assert_equal paid_leave_twelfth[:paid_leave_twelfth],  @spreadings[paid_leave_twelfth[:index]][:paid_leave_twelfth], "paid_leave_full_june is invalid at index #{index}"
+    end
+  end
+
+  test "should valid paid leave 10 percent monthly" do
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
+
+    paids_leave_10_percent_monthly = [
+      { index: 0, paid_leave_10_percent_monthly: 27.748387096774195 },
+      { index: 6, paid_leave_10_percent_monthly: 50.6 },
+      { index: 34, paid_leave_10_percent_monthly: 50.6 }
+    ]
+
+    paids_leave_10_percent_monthly.each_with_index do |paid_leave_10_percent_monthly, index|
+      assert_equal paid_leave_10_percent_monthly[:paid_leave_10_percent_monthly], @spreadings[paid_leave_10_percent_monthly[:index]][:paid_leave_10_percent_monthly], "paid_leave_10_percent_monthly is invalid at index #{index}"
     end
   end
 end

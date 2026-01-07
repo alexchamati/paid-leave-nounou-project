@@ -22,8 +22,19 @@ class PaidLeaveManager::SpreadingsService
     set_salary()
     set_paid_leave_full_june()
     set_paid_leave_twelfth()
+    set_paid_leave_10_percent_monthly()
 
-    # @spreadings
+    @spreadings
+  end
+
+  def set_paid_leave_10_percent_monthly(spreadings = @spreadings)
+    spreadings.map do |spreading|
+      raise "salary are invalid" if spreading[:salary].blank?
+
+      spreading[:paid_leave_10_percent_monthly] = spreading[:salary] * 0.10
+
+      spreading
+    end
   end
 
   def set_paid_leave_twelfth(spreadings = @spreadings)
@@ -60,12 +71,13 @@ class PaidLeaveManager::SpreadingsService
     spreadings
   end
 
-
-
   def set_paid_leave_full_june(spreadings = @spreadings)
     index = 0
     spreadings.each do |spreading|
+      raise "number_work_day_of_month_date are invalid" if spreading[:number_work_day_of_month_date].blank?
+
       break if index == @periods.length
+
       # set two new dates to compare spreading time and end_date contract without compare day
       end_contract_date = Date.new(@contract.end_date.year, @contract.end_date.month, 1)
       spreading_date = Date.new(spreading[:number_work_day_of_month_date].to_date.year, spreading[:number_work_day_of_month_date].to_date.month, 1)
