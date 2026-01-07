@@ -10,7 +10,7 @@ class PaidLeaveManager::PeriodsService
     ten_percent_method: nil,
     final_value: nil
   }.freeze
-  MAINTENANCE_DELTA = 22
+  MAINTENANCE_SALARY_DELTA = 22
 
   def initialize(contract)
     @contract = contract
@@ -30,7 +30,7 @@ class PaidLeaveManager::PeriodsService
 
   def set_final_value(periods = @periods)
     periods.each do |period|
-      raise "number_of_months_of_acquisition is invalid" if period[:salary_maintenance_method].blank? || period[:ten_percent_method].blank?
+      raise "salary_maintenance_method or ten_percent_method is invalid" if period[:salary_maintenance_method].blank? || period[:ten_percent_method].blank?
       period[:final_value] = [ period[:salary_maintenance_method], period[:ten_percent_method] ].max
     end
 
@@ -49,7 +49,7 @@ class PaidLeaveManager::PeriodsService
   def set_salary_maintenance_method(periods = @periods)
     periods.each do |period|
       raise "number_of_months_of_acquisition is invalid" if period[:number_of_months_of_acquisition].blank?
-      period[:salary_maintenance_method] = @contract.salary.to_f / MAINTENANCE_DELTA * period[:number_of_days_acquired]
+      period[:salary_maintenance_method] = @contract.salary.to_f / MAINTENANCE_SALARY_DELTA * period[:number_of_days_acquired]
     end
 
     periods
