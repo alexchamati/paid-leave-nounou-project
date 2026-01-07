@@ -8,7 +8,7 @@ class PaidLeaveManager::SpreadingsService
     paid_leave_twelfth: nil,
     paid_leave_10_percent_monthly: nil,
     paid_leave_10_percent_regularization: nil,
-    paid_leave_10_percent_total: nil,
+    paid_leave_10_percent_total: nil
   }.freeze
 
   def initialize(contract, periods)
@@ -21,9 +21,46 @@ class PaidLeaveManager::SpreadingsService
     set_number_work_day_of_month_date()
     set_salary()
     set_paid_leave_full_june()
+    set_paid_leave_twelfth()
 
-    @spreadings
+    # @spreadings
   end
+
+  def set_paid_leave_twelfth(spreadings = @spreadings)
+    twelfth_value = 0.0
+    # init count_month to count month number before the end_date of the contract
+    # init last_paid_leave_full_june to keep the last amount before the last one
+    ## count_month and last_paid_leave_full_june help to calculate the final twelfth_value
+    count_month = 0
+    last_paid_leave_full_june = nil
+    spreadings.each_with_index do |spreading, index|
+      # if it's a new cycle, we use paid_leave_full_june value to detect it
+      # and get the current twelfth_value for the next cycle
+      if spreading[:paid_leave_full_june] && spreading[:paid_leave_full_june] > 0
+        twelfth_value = (spreading[:paid_leave_full_june] / 12.0)
+
+        # set count_month and last_paid_leave_full_june before the end of contract
+        if index < spreadings.length - 1
+          count_month = 0
+          last_paid_leave_full_june = spreading[:paid_leave_full_june]
+        end
+      end
+
+      # set paid_leave_twelfth
+      ## if it is the end of the contract, we accumulate the payment installments.
+      ## else we simply set twelfth_value
+      if index == spreadings.length - 1 && last_paid_leave_full_june && spreading[:paid_leave_full_june]
+        spreading[:paid_leave_twelfth] = last_paid_leave_full_june - (last_paid_leave_full_june / 12 * count_month) + spreading[:paid_leave_full_june] # Simulation de solde
+      else
+        spreading[:paid_leave_twelfth] = twelfth_value > 0 ? twelfth_value : nil
+        count_month += 1
+      end
+    end
+
+    spreadings
+  end
+
+
 
   def set_paid_leave_full_june(spreadings = @spreadings)
     index = 0

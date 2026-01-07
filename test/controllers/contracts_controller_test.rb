@@ -44,6 +44,6 @@ class ContractsControllerTest < ActionDispatch::IntegrationTest
 
     # observable result, html
     follow_redirect!
-    assert_dom "section[id=content-section]"
+    assert_dom "section[id=form-section]"
   end
 end
