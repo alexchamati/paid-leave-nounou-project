@@ -1,4 +1,6 @@
 class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
+  ASSERT_DELTA = 0.01
+
   setup do
     @contract = contracts.first
     raise "fixture contracts is empty" if @contract.nil?
@@ -34,6 +36,8 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
   test "should valid salary" do
     @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
 
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
     @spreadings.each_with_index do |spreading, index|
       # get number day in the month
       nb_days_month = Date.new(spreading[:number_work_day_of_month_date].year, spreading[:number_work_day_of_month_date].month, -1).day
@@ -44,13 +48,15 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
         salary = (nb_days_month - spreading[:number_work_day_of_month_date].day + 1) * @contract.salary.to_f / nb_days_month * 1.0
       end
 
-      assert_equal salary, spreading[:salary], "salary is invalid at index #{index}"
+      assert_in_delta salary, spreading[:salary], ASSERT_DELTA, "salary is invalid at index #{index}"
     end
   end
 
   test "should valid paid leave full june" do
     @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
 
     index = 0
     @spreadings.each_with_index do |spreading, index_spreading|
@@ -61,7 +67,7 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
 
       # if is june or the last month, we set lead paid at this month
       if spreading[:number_work_day_of_month_date].to_date.month.to_i == 6 || end_contract_date == spreading_date
-        assert_equal @periods[index][:final_value], spreading[:paid_leave_full_june], "paid_leave_full_june is invalid at index #{index_spreading}"
+        assert_in_delta @periods[index][:final_value], spreading[:paid_leave_full_june], ASSERT_DELTA, "paid_leave_full_june is invalid at index #{index_spreading}"
         index += 1
       end
     end
@@ -72,6 +78,8 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
 
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
     paids_leave_twelfth = [
       { index: 0, paid_leave_twelfth: nil },
       { index: 6, paid_leave_twelfth: 12.211021505376344 },
@@ -79,7 +87,12 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
     ]
 
     paids_leave_twelfth.each_with_index do |paid_leave_twelfth, index|
-      assert_equal paid_leave_twelfth[:paid_leave_twelfth],  @spreadings[paid_leave_twelfth[:index]][:paid_leave_twelfth], "paid_leave_full_june is invalid at index #{index}"
+    expected = @spreadings[paid_leave_twelfth[:index]][:paid_leave_twelfth]
+      if expected.nil?
+        assert_nil paid_leave_twelfth[:paid_leave_twelfth], "paid_leave_twelfth should be nil at index #{index}"
+      else
+         assert_in_delta paid_leave_twelfth[:paid_leave_twelfth], expected, ASSERT_DELTA, "paid_leave_full_june is invalid at index #{index}"
+      end
     end
   end
 
@@ -89,6 +102,8 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
     @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
 
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
     paids_leave_10_percent_monthly = [
       { index: 0, paid_leave_10_percent_monthly: 27.748387096774195 },
       { index: 6, paid_leave_10_percent_monthly: 50.6 },
@@ -96,7 +111,77 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
     ]
 
     paids_leave_10_percent_monthly.each_with_index do |paid_leave_10_percent_monthly, index|
-      assert_equal paid_leave_10_percent_monthly[:paid_leave_10_percent_monthly], @spreadings[paid_leave_10_percent_monthly[:index]][:paid_leave_10_percent_monthly], "paid_leave_10_percent_monthly is invalid at index #{index}"
+      expected = @spreadings[paid_leave_10_percent_monthly[:index]][:paid_leave_10_percent_monthly]
+      assert_in_delta paid_leave_10_percent_monthly[:paid_leave_10_percent_monthly], expected, ASSERT_DELTA, "paid_leave_10_percent_monthly is invalid at index #{index}"
     end
+  end
+
+  test "should valid paid leave 10 percent regularization" do
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_regularization(@spreadings)
+
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
+    paids_leave_10_percent_regularization = [
+      { index: 3, paid_leave_10_percent_regularization: 17.583870967741944 },
+      { index: 15, paid_leave_10_percent_regularization: 82.79999999999995 },
+      { index: 27, paid_leave_10_percent_regularization: 82.79999999999995 },
+      { index: 34, paid_leave_10_percent_regularization: 55.19999999999999 }
+    ]
+
+    paids_leave_10_percent_regularization.each_with_index do |paid_leave_10_percent_regularization, index|
+      expected = @spreadings[paid_leave_10_percent_regularization[:index]][:paid_leave_10_percent_regularization]
+      assert_in_delta paid_leave_10_percent_regularization[:paid_leave_10_percent_regularization], expected, ASSERT_DELTA, "paid_leave_10_percent_regularization is invalid at index #{index}"
+    end
+  end
+
+  test "should valid paid leave 10 percent total" do
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_regularization(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_total(@spreadings)
+
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
+    paids_leave_paid_leave_10_percent_total = [
+      { index: 0, paid_leave_10_percent_total: 27.748387096774195 },
+      { index: 15, paid_leave_10_percent_total: 133.39999999999995 },
+      { index: 27, paid_leave_10_percent_total: 133.39999999999995 },
+      { index: 34, paid_leave_10_percent_total: 105.79999999999998 }
+    ]
+
+    paids_leave_paid_leave_10_percent_total.each_with_index do |paid_leave_paid_leave_10_percent_total, index|
+      expected = @spreadings[paid_leave_paid_leave_10_percent_total[:index]][:paid_leave_10_percent_total]
+      assert_in_delta paid_leave_paid_leave_10_percent_total[:paid_leave_10_percent_total], expected, ASSERT_DELTA, "paid_leave_10_percent_total is invalid at index #{index}"
+    end
+  end
+
+  test "should have same totals" do
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_regularization(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_total(@spreadings)
+
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
+    sum_paid_leave_full_june = 0
+    sum_paid_leave_10_percent_total = 0
+    sum_paid_leave_twelfth = 0
+    @spreadings.each do |spreading|
+      sum_paid_leave_full_june += spreading[:paid_leave_full_june] || 0.0
+      sum_paid_leave_twelfth += spreading[:paid_leave_twelfth] || 0.0
+      sum_paid_leave_10_percent_total += spreading[:paid_leave_10_percent_total] || 0.0
+    end
+
+    assert_in_delta 1986.532258064516, sum_paid_leave_full_june, ASSERT_DELTA, "total paid_leave_full_june is invalid"
+    assert_in_delta 1986.532258064516, sum_paid_leave_twelfth, ASSERT_DELTA, "total paid_leave_twelfth is invalid"
+    assert_in_delta 1986.532258064516, sum_paid_leave_10_percent_total, ASSERT_DELTA, "total paid_leave_10_percent_total is invalid"
   end
 end

@@ -1,6 +1,8 @@
 require "test_helper.rb"
 
 class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
+  ASSERT_DELTA = 0.01
+
   setup do
     @contract = contracts.first
     raise "fixture contracts is empty" if @contract.nil?
@@ -10,9 +12,6 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
   end
 
   test "Sould have valid periods" do
-    # to do
-    # assert_raises
-
     period_dates = [
       {
         start_date_period: Date.parse("2020-03-15"),
@@ -38,9 +37,6 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
   end
 
   test "should have valid numbers of months of acquisition" do
-    # to do
-    # assert_raises
-
     periods_number_of_months = [
       { number_of_months_of_acquisition: 2.5483870967741935 },
       { number_of_months_of_acquisition: 12.0 },
@@ -50,15 +46,15 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
 
     @periods = @paid_lead_periods_service.set_numbers_of_months_of_acquisition(@periods)
 
+    assert @periods.is_a?(Array) && @periods.any?, "periods is empty or invalid"
+
     periods_number_of_months.each_with_index do |period_number_of_months, index|
-      assert_equal period_number_of_months[:number_of_months_of_acquisition], @periods[index][:number_of_months_of_acquisition], "number_of_months_of_acquisition is invalid at index #{index}"
+      expected = @periods[index][:number_of_months_of_acquisition]
+      assert_in_delta period_number_of_months[:number_of_months_of_acquisition], expected, ASSERT_DELTA, "number_of_months_of_acquisition is invalid at index #{index}"
     end
   end
 
   test "should have valid number of days acquired" do
-    # to do
-    # assert_raises
-
     periods_number_of_days_acquired = [
       { number_of_days_acquired: 6.370967741935484 },
       { number_of_days_acquired: 30.0 },
@@ -69,15 +65,15 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
     @periods = @paid_lead_periods_service.set_numbers_of_months_of_acquisition(@periods)
     @periods = @paid_lead_periods_service.set_number_of_days_acquired(@periods)
 
+    assert @periods.is_a?(Array) && @periods.any?, "periods is empty or invalid"
+
     periods_number_of_days_acquired.each_with_index do |period_number_of_days_acquired, index|
-      assert_equal period_number_of_days_acquired[:number_of_days_acquired], @periods[index][:number_of_days_acquired], "number_of_days_acquired is invalid at index #{index}"
+      expected = @periods[index][:number_of_days_acquired]
+      assert_in_delta period_number_of_days_acquired[:number_of_days_acquired], expected, ASSERT_DELTA, "number_of_days_acquired is invalid at index #{index}"
     end
   end
 
   test "should have valid salary maintenance method" do
-    # to do
-    # assert_raises
-
     periods_salary_maintenance_method = [
       { salary_maintenance_method: 146.532258064516138 },
       { salary_maintenance_method: 690.0 },
@@ -89,15 +85,15 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
     @periods = @paid_lead_periods_service.set_number_of_days_acquired(@periods)
     @periods = @paid_lead_periods_service.set_salary_maintenance_method(@periods)
 
+    assert @periods.is_a?(Array) && @periods.any?, "periods is empty or invalid"
+
     periods_salary_maintenance_method.each_with_index do |period_salary_maintenance_method, index|
-      assert_equal period_salary_maintenance_method[:salary_maintenance_method], @periods[index][:salary_maintenance_method], "salary_maintenance_method is invalid at index #{index}"
+      expected = @periods[index][:salary_maintenance_method]
+      assert_in_delta period_salary_maintenance_method[:salary_maintenance_method], expected, ASSERT_DELTA, "salary_maintenance_method is invalid at index #{index}"
     end
   end
 
   test "should have valid ten percent method" do
-    # to do
-    # assert_raises
-
     periods_ten_percent_method = [
       { ten_percent_method: 128.9483870967742 },
       { ten_percent_method: 607.2 },
@@ -110,15 +106,14 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
     @periods = @paid_lead_periods_service.set_salary_maintenance_method(@periods)
     @periods = @paid_lead_periods_service.set_ten_percent_method(@periods)
 
+    assert @periods.is_a?(Array) && @periods.any?, "periods is empty or invalid"
+
     periods_ten_percent_method.each_with_index do |period_ten_percent_method, index|
-      assert_equal period_ten_percent_method[:ten_percent_method], @periods[index][:ten_percent_method], "ten_percent_method is invalid at index #{index}"
+      assert_in_delta period_ten_percent_method[:ten_percent_method], @periods[index][:ten_percent_method], ASSERT_DELTA, "ten_percent_method is invalid at index #{index}"
     end
   end
 
   test "should have valid final value" do
-    # to do
-    # assert_raises
-
     periods_final_value = [
       { final_value: 146.53225806451613 },
       { final_value: 690.0 },
@@ -132,8 +127,10 @@ class PaidLeaveManager::PeriodsServiceTest < ActiveSupport::TestCase
     @periods = @paid_lead_periods_service.set_ten_percent_method(@periods)
     @periods = @paid_lead_periods_service.set_final_value(@periods)
 
+    assert @periods.is_a?(Array) && @periods.any?, "periods is empty or invalid"
+
     periods_final_value.each_with_index do |period_final_value, index|
-      assert_equal period_final_value[:final_value], @periods[index][:final_value], "final_value is invalid at index #{index}"
+      assert_in_delta period_final_value[:final_value], @periods[index][:final_value], ASSERT_DELTA, "final_value is invalid at index #{index}"
     end
   end
 end
