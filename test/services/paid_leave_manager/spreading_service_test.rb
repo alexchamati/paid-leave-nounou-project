@@ -184,4 +184,31 @@ class PaidLeaveManager::SpreadingsServiceTest < ActiveSupport::TestCase
     assert_in_delta 1986.532258064516, sum_paid_leave_twelfth, ASSERT_DELTA, "total paid_leave_twelfth is invalid"
     assert_in_delta 1986.532258064516, sum_paid_leave_10_percent_total, ASSERT_DELTA, "total paid_leave_10_percent_total is invalid"
   end
+
+  test "should have same totals with a small period of two weeks in a month" do
+    @contract = contracts(:three)
+    @periods = PaidLeaveManager::PeriodsService.new(@contract).call
+    @paid_lead_spreadings_service = PaidLeaveManager::SpreadingsService.new(@contract, @periods)
+    @spreadings = @paid_lead_spreadings_service.set_number_work_day_of_month_date
+    @spreadings = @paid_lead_spreadings_service.set_salary(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_full_june(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_twelfth(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_monthly(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_regularization(@spreadings)
+    @spreadings = @paid_lead_spreadings_service.set_paid_leave_10_percent_total(@spreadings)
+
+    assert @spreadings.is_a?(Array) && @spreadings.any?, "spreadings is empty or invalid"
+
+    sum_paid_leave_full_june = 0
+    sum_paid_leave_10_percent_total = 0
+    sum_paid_leave_twelfth = 0
+    @spreadings.each do |spreading|
+      sum_paid_leave_full_june += spreading[:paid_leave_full_june] || 0.0
+      sum_paid_leave_twelfth += spreading[:paid_leave_twelfth] || 0.0
+      sum_paid_leave_10_percent_total += spreading[:paid_leave_10_percent_total] || 0.0
+    end
+
+    assert_in_delta 40.51136363636364, sum_paid_leave_full_june, ASSERT_DELTA, "total paid_leave_full_june is invalid"
+    assert_in_delta 40.51136363636364, sum_paid_leave_twelfth, ASSERT_DELTA, "total paid_leave_twelfth is invalid"
+  end
 end

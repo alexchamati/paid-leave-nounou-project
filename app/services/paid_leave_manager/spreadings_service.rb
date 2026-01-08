@@ -86,6 +86,8 @@ class PaidLeaveManager::SpreadingsService
     ## count_month and last_paid_leave_full_june help to calculate the final twelfth_value
     count_month = 0
     last_paid_leave_full_june = nil
+
+    # case at the end of a cycle, before the next one
     spreadings.each_with_index do |spreading, index|
       # if it's a new cycle, we use paid_leave_full_june value to detect it
       # and get the current twelfth_value for the next cycle
@@ -99,12 +101,25 @@ class PaidLeaveManager::SpreadingsService
         end
       end
 
-      # set paid_leave_twelfth
-      ## if it is the end of the contract, we accumulate the payment installments.
-      ## else we simply set twelfth_value
-      if index == spreadings.length - 1 && last_paid_leave_full_june && spreading[:paid_leave_full_june]
-        spreading[:paid_leave_twelfth] = last_paid_leave_full_june - (last_paid_leave_full_june / 12 * count_month) + spreading[:paid_leave_full_june] # Simulation de solde
+      # manage last line
+      if index == spreadings.length - 1
+        # get final_value from the last period
+        final_period_value = @periods.last[:final_value] if @periods&.last
+
+        if last_paid_leave_full_june && final_period_value
+          # end of a cycle before the next one case
+          # we calculate remaining amount with the cumul of previous period + Total balance for current period
+          remaining_previous = last_paid_leave_full_june - (last_paid_leave_full_june / 12.0 * count_month)
+          spreading[:paid_leave_twelfth] = remaining_previous + final_period_value
+        elsif final_period_value
+          # end of the contract case
+          spreading[:paid_leave_twelfth] = final_period_value
+        else
+          # set paid_leave_twelfth value
+          spreading[:paid_leave_twelfth] = twelfth_value > 0 ? twelfth_value : nil
+        end
       else
+        # set paid_leave_twelfth value
         spreading[:paid_leave_twelfth] = twelfth_value > 0 ? twelfth_value : nil
         count_month += 1
       end
