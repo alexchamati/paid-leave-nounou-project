@@ -38,6 +38,24 @@
         </tr>
       <% end %>
     </tbody>
+    <tfoot>
+      <tr>
+        <td class="dates">TOTAL</td>
+        <td class="text-right highlight-salary">
+          <%= number_to_currency(spreadings.sum { |s| s[:salary] || 0 }, locale: :fr) %>
+        </td>
+        <td class="text-right">
+          <%= number_to_currency(spreadings.sum { |s| s[:paid_leave_full_june] || 0 }, locale: :fr) %>
+        </td>
+        <td class="text-right">
+          <%= number_to_currency(spreadings.sum { |s| s[:paid_leave_twelfth] || 0 }, locale: :fr) %>
+        </td>
+        <td class="text-right"></td>
+        <td class="text-right"></td>
+        <td class="text-right final-total">
+          <%= number_to_currency(spreadings.sum { |s| s[:paid_leave_10_percent_total] || 0 }, locale: :fr) %>
+        </td>
+    </tfoot>
   </table>
 </div>
 
@@ -64,6 +82,11 @@
   .table-spreadings td {
     padding: 8px 10px;
     border-bottom: 1px solid #eee;
+  }
+  .table-spreadings tfoot tr {
+    background-color: #fafafa;
+    border-top: 2px solid #bbb;
+    font-weight: bold;
   }
   .text-right { text-align: right; }
   .dates { font-weight: 500; color: #2c3e50; text-transform: capitalize; }
